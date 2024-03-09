@@ -1,0 +1,24 @@
+{
+  "include":[
+    "src/**/*", "test"
+  ],
+  "exclude":[
+    "./web/*",
+    "web/*",
+    "./node_modules/*"
+  ],
+  "compilerOptions": {
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "resolveJsonModule" : true,
+    "noEmit": false,
+    "outDir": "dist",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "lib": [
+      "ES2015",
+      "DOM"
+    ],
+    "sourceMap": true
+  }
+}

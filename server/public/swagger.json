@@ -1,0 +1,308 @@
+{
+	"components": {
+		"examples": {},
+		"headers": {},
+		"parameters": {},
+		"requestBodies": {},
+		"responses": {},
+		"schemas": {
+			"DetailedError": {
+				"properties": {
+					"message": {
+						"type": "string"
+					},
+					"standardizedErrorCode": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"message",
+					"standardizedErrorCode"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IServerResponse_void_": {
+				"properties": {
+					"status": {
+						"type": "boolean"
+					},
+					"message": {
+						"type": "string"
+					},
+					"data": {},
+					"error": {
+						"type": "string"
+					},
+					"errors": {
+						"items": {
+							"$ref": "#/components/schemas/DetailedError"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"status"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"NewServiceDto": {
+				"properties": {
+					"name": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"name"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ServiceResponseData": {
+				"properties": {
+					"serviceUuid": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"serviceId": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					}
+				},
+				"required": [
+					"serviceUuid",
+					"name"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IServerResponse_ServiceResponseData-Array_": {
+				"properties": {
+					"status": {
+						"type": "boolean"
+					},
+					"message": {
+						"type": "string"
+					},
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/ServiceResponseData"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "string"
+					},
+					"errors": {
+						"items": {
+							"$ref": "#/components/schemas/DetailedError"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"status"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IInvoiceResponseData": {
+				"properties": {
+					"paymentHash": {
+						"type": "string"
+					},
+					"paymentRequest": {
+						"type": "string"
+					},
+					"expiresAt": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"paymentHash",
+					"paymentRequest",
+					"expiresAt"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IServerResponse_IInvoiceResponseData_": {
+				"properties": {
+					"status": {
+						"type": "boolean"
+					},
+					"message": {
+						"type": "string"
+					},
+					"data": {
+						"$ref": "#/components/schemas/IInvoiceResponseData"
+					},
+					"error": {
+						"type": "string"
+					},
+					"errors": {
+						"items": {
+							"$ref": "#/components/schemas/DetailedError"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"status"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"NewTransactionDto": {
+				"properties": {
+					"serviceUuid": {
+						"type": "string"
+					},
+					"provider": {
+						"type": "string"
+					},
+					"amount": {
+						"type": "number",
+						"format": "double"
+					},
+					"payerName": {
+						"type": "string"
+					},
+					"payerEmail": {
+						"type": "string"
+					},
+					"phoneNumber": {
+						"type": "string",
+						"nullable": true
+					},
+					"meterNumber": {
+						"type": "string",
+						"nullable": true
+					}
+				},
+				"required": [
+					"serviceUuid",
+					"provider",
+					"amount",
+					"payerName",
+					"payerEmail"
+				],
+				"type": "object",
+				"additionalProperties": false
+			}
+		},
+		"securitySchemes": {
+			"jwt": {
+				"type": "apiKey",
+				"name": "x-access-token",
+				"in": "header"
+			}
+		}
+	},
+	"info": {
+		"title": "shortURL",
+		"version": "1.0.0",
+		"description": "shortURL Service Backend",
+		"contact": {
+			"name": "Mubarak Aminu"
+		}
+	},
+	"openapi": "3.0.0",
+	"paths": {
+		"/api/transaction/new-service": {
+			"post": {
+				"operationId": "HandleNewTicket",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/IServerResponse_void_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Transaction Service"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/NewServiceDto"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/transaction/service": {
+			"get": {
+				"operationId": "HandleFetchService",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/IServerResponse_ServiceResponseData-Array_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Transaction Service"
+				],
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/api/transaction/new-service-transaction": {
+			"post": {
+				"operationId": "HandleNewTransaction",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/IServerResponse_IInvoiceResponseData_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Transaction Service"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/NewTransactionDto"
+							}
+						}
+					}
+				}
+			}
+		}
+	},
+	"servers": [
+		{
+			"url": "/"
+		}
+	]
+}
