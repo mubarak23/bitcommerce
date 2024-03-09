@@ -66,3 +66,61 @@ export const getWalletBalance = async (wallet: string): Promise<AxiosResponse> =
 }
 
 
+
+export const getAllWallets = async (): Promise<AxiosResponse> => {
+
+  const payload = {
+      jsonrpc: '1.0',
+      id: 'curltext',
+      method: 'listwallets',
+      params: [],
+  };
+
+  try {
+
+    const response: AxiosResponse<any> = await axios.post(bitcoinAuth.bitcoinUrl, payload, {
+      headers
+    })
+
+    return response
+
+  } catch(e) {
+    const errorMessage = Utils.handleAxiosRequestError(e)
+    console.log(`e handleAxiosRequestError message: `, errorMessage)
+    console.log(`e message: `, e.message)
+    console.log(e.stack)
+
+    throw new ServerError('An error occurred. Try again')
+  }
+
+}
+
+
+export const getWalletTransactions = async (wallet: string): Promise<AxiosResponse> => {
+
+  const payload = {
+      jsonrpc: '1.0',
+      id: 'curltext',
+      method: 'listtransactions',
+      params: ['*', 100],
+  };
+
+  try {
+
+    const response: AxiosResponse<any> = await axios.post(`${bitcoinAuth.bitcoinUrl}/wallet/${wallet}`, payload, {
+      headers
+    })
+
+    return response
+
+  } catch(e) {
+    const errorMessage = Utils.handleAxiosRequestError(e)
+    console.log(`e handleAxiosRequestError message: `, errorMessage)
+    console.log(`e message: `, e.message)
+    console.log(e.stack)
+
+    throw new ServerError('An error occurred. Try again')
+  }
+
+}
+
