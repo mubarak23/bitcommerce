@@ -1,0 +1,17 @@
+logs/
+# .env
+
+**/node_modules
+npm-debug.log
+.DS_Store
+
+# Excluding WebStorm config files
+.idea/*
+
+# Excluding VSCode config files
+.vscode/*
+
+*.map
+**/*.js
+
+package-lock.json

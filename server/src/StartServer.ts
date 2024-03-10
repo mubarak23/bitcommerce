@@ -1,9 +1,12 @@
+import path from "path";
 import "reflect-metadata";
 import app from "./app";
 import * as Cron from "./cron";
+import * as GlobalErrorHandler from "./middleware/globalErrorHandler";
 import runDatabaseMigrations from "./migrations";
 import { RegisterRoutes } from "./routes";
-import * as GlobalErrorHandler from "./middleware/globalErrorHandler";
+
+require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 
 (async () => {
   await runDatabaseMigrations();
@@ -15,7 +18,7 @@ import * as GlobalErrorHandler from "./middleware/globalErrorHandler";
 
   // - Start Http Server
   const portAsString: string = (process.env.PORT as string);
-  const port = parseInt(portAsString) || 3200
+  const port = parseInt(portAsString) || 3400
   app.listen(port);
   
   console.log("Server started!");

@@ -2,8 +2,6 @@
 /* eslint-disable */
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { Controller, ValidationService, FieldErrors, ValidateError, TsoaRoute, HttpStatusCodeLiteral, TsoaResponse } from '@tsoa/runtime';
-// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-import { TransactionController } from './controllers/TransactionController';
 import { expressAuthentication } from './authentication';
 // @ts-ignore - no great way to install types from subpackage
 const promiseAny = require('promise.any');
@@ -12,93 +10,6 @@ import * as express from 'express';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
 const models: TsoaRoute.Models = {
-    "DetailedError": {
-        "dataType": "refObject",
-        "properties": {
-            "message": {"dataType":"string","required":true},
-            "standardizedErrorCode": {"dataType":"string","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "IServerResponse_void_": {
-        "dataType": "refObject",
-        "properties": {
-            "status": {"dataType":"boolean","required":true},
-            "message": {"dataType":"string"},
-            "data": {"dataType":"void"},
-            "error": {"dataType":"string"},
-            "errors": {"dataType":"array","array":{"dataType":"refObject","ref":"DetailedError"}},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "NewServiceDto": {
-        "dataType": "refObject",
-        "properties": {
-            "name": {"dataType":"string","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "ServiceResponseData": {
-        "dataType": "refObject",
-        "properties": {
-            "serviceUuid": {"dataType":"string","required":true},
-            "name": {"dataType":"string","required":true},
-            "serviceId": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}]},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "IServerResponse_ServiceResponseData-Array_": {
-        "dataType": "refObject",
-        "properties": {
-            "status": {"dataType":"boolean","required":true},
-            "message": {"dataType":"string"},
-            "data": {"dataType":"array","array":{"dataType":"refObject","ref":"ServiceResponseData"}},
-            "error": {"dataType":"string"},
-            "errors": {"dataType":"array","array":{"dataType":"refObject","ref":"DetailedError"}},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "IInvoiceResponseData": {
-        "dataType": "refObject",
-        "properties": {
-            "paymentHash": {"dataType":"string","required":true},
-            "paymentRequest": {"dataType":"string","required":true},
-            "expiresAt": {"dataType":"string","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "IServerResponse_IInvoiceResponseData_": {
-        "dataType": "refObject",
-        "properties": {
-            "status": {"dataType":"boolean","required":true},
-            "message": {"dataType":"string"},
-            "data": {"ref":"IInvoiceResponseData"},
-            "error": {"dataType":"string"},
-            "errors": {"dataType":"array","array":{"dataType":"refObject","ref":"DetailedError"}},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "NewTransactionDto": {
-        "dataType": "refObject",
-        "properties": {
-            "serviceUuid": {"dataType":"string","required":true},
-            "provider": {"dataType":"string","required":true},
-            "amount": {"dataType":"double","required":true},
-            "payerName": {"dataType":"string","required":true},
-            "payerEmail": {"dataType":"string","required":true},
-            "phoneNumber": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
-            "meterNumber": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 };
 const validationService = new ValidationService(models);
 
@@ -109,75 +20,6 @@ export function RegisterRoutes(app: express.Router) {
     //  NOTE: If you do not see routes for all of your controllers in this file, then you might not have informed tsoa of where to look
     //      Please look into the "controllerPathGlobs" config option described in the readme: https://github.com/lukeautry/tsoa
     // ###########################################################################################################
-        app.post('/api/transaction/new-service',
-
-            function TransactionController_handleNewTicket(request: any, response: any, next: any) {
-            const args = {
-                    reqBody: {"in":"body","name":"reqBody","required":true,"ref":"NewServiceDto"},
-            };
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = getValidatedArgs(args, request, response);
-
-                const controller = new TransactionController();
-
-
-              const promise = controller.handleNewTicket.apply(controller, validatedArgs as any);
-              promiseHandler(controller, promise, response, undefined, next);
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.get('/api/transaction/service',
-
-            function TransactionController_handleFetchService(request: any, response: any, next: any) {
-            const args = {
-                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
-            };
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = getValidatedArgs(args, request, response);
-
-                const controller = new TransactionController();
-
-
-              const promise = controller.handleFetchService.apply(controller, validatedArgs as any);
-              promiseHandler(controller, promise, response, undefined, next);
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.post('/api/transaction/new-service-transaction',
-
-            function TransactionController_handleNewTransaction(request: any, response: any, next: any) {
-            const args = {
-                    reqBody: {"in":"body","name":"reqBody","required":true,"ref":"NewTransactionDto"},
-            };
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = getValidatedArgs(args, request, response);
-
-                const controller = new TransactionController();
-
-
-              const promise = controller.handleNewTransaction.apply(controller, validatedArgs as any);
-              promiseHandler(controller, promise, response, undefined, next);
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 

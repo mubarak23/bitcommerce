@@ -1,8 +1,8 @@
 enum Tables {
-  UrlShortLer = "UrlShortLer",
-  Services = "Services",
-  ServiceTransactions = "ServiceTransactions",
-  AlbyWebhooks = "AlbyWebhooks",
+ 
+  Users = "Users",
+  Orders = "Orders"
+  
 }
 
 export default Tables;
