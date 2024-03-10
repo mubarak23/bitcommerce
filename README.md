@@ -1,6 +1,6 @@
-# BIT Commerce
+# Bit Commerce
 
-Bit Commerce is a Bitcoin/Lightning applications for Seller for sell their Product and get Paid in Bitcoin.
+Bit Commerce is a Bitcoin/Lightning applications for Seller to sell their Product and get Paid in Bitcoin.
 
 ## Technologies Used
 
