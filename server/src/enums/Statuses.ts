@@ -14,4 +14,14 @@ export enum ServicesEnum {
   AIRTIME = 'airtime'
 }
 
+export enum PaymentStatus {
+  UNPAID = "UNPAID",
+  PAID = "PAID"
+}
+
+export enum OrderStatuses {
+  CREATED = "CREATED",
+  IN_PROGRESS = "IN_PROGRESS",
+  CONFIRMED = "CONFIRMED"
+}
 
