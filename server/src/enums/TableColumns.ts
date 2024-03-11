@@ -10,6 +10,40 @@ export enum UserColumns {
   IS_SOFT_DELETED = "is_soft_delete",
 }
 
+export enum BrandColumns {
+  UUID = "uuid",
+  NAME = "name",
+  DESCRIPTION = "description",
+  IMAGE = "image",
+  IS_SOFT_DELETED = "is_soft_delete",
+}
+
+
+export enum CategoriesColumns {
+  UUID = "uuid",
+  NAME = "name",
+  DESCRIPTION = "description",
+  IMAGE = "image",
+  IS_SOFT_DELETED = "is_soft_delete",
+}
+
+export enum ProductColumns {
+  UUID = "uuid",
+  NAME = "name",
+  DESCRIPTION = "description",
+  USER_ID = "user_id",
+  CATEGORY_ID = "category_id",
+  BRAND_ID = "brand_id",
+  PRICE = "price",
+  PRICR_IN_SATS = "price_in_sats",
+  IMAGES = "images",
+  MAX_QTY = "max_qty",
+  MIN_QTY = "min_qty",
+  IS_ACTIVE = "is_active",
+  IS_SOFT_DELETED = "is_soft_delete",
+}
+
+
 export enum OrderColumns {
   UUID = "uuid",
   BUYER_USER_ID = "buyer_user_id",
