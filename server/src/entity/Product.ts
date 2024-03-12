@@ -21,7 +21,7 @@ export class Product extends DefualtEntity {
     name: ProductColumns.USER_ID,
     referencedColumnName: TableColumns.ID,
   })
-  buyerUser: User;
+  sellerUser: User;
 
   @Column({ name: ProductColumns.CATEGORY_ID, nullable: false })
   categoryId: number;
@@ -67,9 +67,10 @@ export class Product extends DefualtEntity {
   })
   isSoftDeleted: boolean;
 
-  initializeNewProductBySeller(name: string, description: string, price: number, priceInSats: number, maxQty: number, minQty: number){
+  initializeNewProductBySeller(userId: number, name: string, description: string, price: number, priceInSats: number, maxQty: number, minQty: number){
     const now = utcNow();
     this.uuid = uuidv4();
+    this.userId = userId;
     this.name = name;
     this.description = description;
     this.price = price;
