@@ -13,6 +13,7 @@
     "resolveJsonModule" : true,
     "noEmit": false,
     "outDir": "dist",
+    "moduleResolution": "node",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "lib": [
