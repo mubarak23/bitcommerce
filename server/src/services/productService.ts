@@ -1,6 +1,7 @@
 
 import { fiatToSatoshis } from 'bitcoin-conversion';
 import { getFreshConnection } from "../db";
+import { AddProductCartDto } from '../dto/AddProductCartDto';
 import { BrandResponse } from "../dto/BrandResponse";
 import { CategoryResponse } from "../dto/CategoryResponse";
 import { NewBrandDto } from "../dto/NewBrandDto";
@@ -8,9 +9,11 @@ import { NewCategoryDto } from "../dto/NewCategoryDto";
 import { NewProductDto } from "../dto/NewProductDto";
 import { ProductResponse } from "../dto/ProductResponse";
 import { Brand } from "../entity/Brand";
+import { Cart } from '../entity/Cart';
 import { Category } from "../entity/Category";
 import { Product } from "../entity/Product";
 import { User } from "../entity/User";
+import { CartItemJson } from '../interfaces/CartItemJson';
 import { UnprocessableEntityError } from "../utils/error-response-types";
 
 export const newBrand = async (payload: NewBrandDto): Promise<BrandResponse> => {
@@ -224,6 +227,74 @@ export const fetchBrands = async (): Promise<BrandResponse[]> => {
   }
 
 
+  export const addProductToCart = async (buyerUser: User,  payload: AddProductCartDto): Promise<boolean> => {
+    const connection = await getFreshConnection()
+    const prooductRepo = connection.getRepository(Product)
+    const cartRepo = connection.getRepository(Cart)
+    
+    const productExist = await prooductRepo.findOne({
+      where: { uuid: payload.productUuid, isSoftDeleted: false}
+    })
 
+    if(!productExist){
+      throw new UnprocessableEntityError("Product Does Not Exist")
+    }
 
+    const userCartExist = await cartRepo.findOne({
+      where: { userId: buyerUser.id, isSoftDeleted: false }
+    })
 
+    if(!userCartExist) {
+      let newCart = new Cart().initializeFirstCart(buyerUser.id, productExist, payload.quantity)
+
+      await cartRepo.save(newCart)
+      return true
+    }
+    
+    const { cartItems } = userCartExist;
+    const itemFoundInCart: CartItemJson | undefined = cartItems.find(
+      (cartItem) => cartItem.productUuid === productExist.uuid
+    );
+
+    if(!itemFoundInCart){
+      const newCartItem: CartItemJson = {
+        productUuid: productExist.uuid,
+        productId: productExist.id,
+        quantity: payload.quantity,
+        productName: productExist.name,
+        unitPrice: productExist.price,
+      }
+      await cartRepo.createQueryBuilder()
+      .update(Cart)
+      .set({
+        cartItems: [...cartItems, newCartItem]
+      })
+      .where({
+        id: userCartExist.id
+      })
+      .execute()
+
+      return true
+    }
+
+    itemFoundInCart.productId = productExist.id,
+    itemFoundInCart.productUuid = productExist.uuid,
+    itemFoundInCart.quantity = payload.quantity,
+    itemFoundInCart.unitPrice = productExist.price,
+    itemFoundInCart.productName = productExist.name
+
+    await cartRepo.createQueryBuilder()
+    .update(Cart)
+    .set({
+      cartItems
+    })
+    .where({
+      id: userCartExist.id
+    })
+    .execute()
+      
+    return true
+   
+    }
+
+    
