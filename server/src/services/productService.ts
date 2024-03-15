@@ -325,4 +325,73 @@ export const fetchBrands = async (): Promise<BrandResponse[]> => {
    
     }
 
+ 
+    export const transformProducts = async (products: Product[]): Promise<ProductResponse[]> => {
+      if(!products.length) {
+        return []
+      }
+      const productsResponse: ProductResponse[] = []
     
+      for(const product of products) {
+        const transformProduct: ProductResponse = {
+          productUuid: product.uuid,
+          categoryUuid: product.category.uuid,
+          categoryName: product.category.name,
+          brandUuid: product.brand.uuid,
+          brandName: product.brand.name,
+          name: product.name,
+          description: product.description,
+          minQty: product.minQty,
+          maxQty: product.maxQty,
+          price: product.price,
+          priceInSats: product.priceInSats,
+          images: product.images
+        }
+        productsResponse.push(transformProduct)
+      }
+    
+      return productsResponse;
+    };
+    
+    
+    export const transformProduct = async (productUuid: string): Promise<ProductResponse> => {
+
+      const connection = await getFreshConnection()
+      const productRepo = connection.getRepository(Product)
+      const brandRepo = connection.getRepository(Brand)
+      const categoryRepo = connection.getRepository(Category)
+     
+      const productExist = await productRepo.findOne({
+        where: { uuid: productUuid, isSoftDeleted: false}
+      })
+    
+      if(!productExist){
+       throw new UnprocessableEntityError("Product Does Not Exist")
+      }
+
+      // pull the product brand and category  
+      const category = await categoryRepo.findOne({
+        id: productExist.categoryId
+      })
+  
+      const brand = await brandRepo.findOne({
+        where: { id: productExist.brandId }
+      })
+  
+      const transformProduct: ProductResponse = {
+        productUuid: productExist.uuid,
+        categoryUuid: category!.uuid,
+        categoryName: category!.name,
+        brandUuid: brand!.uuid,
+        brandName: brand!.name,
+        name: productExist.name,
+        description: productExist.description,
+        minQty: productExist.minQty,
+        maxQty: productExist.maxQty,
+        price: productExist.price,
+        priceInSats: productExist.priceInSats,
+        images: productExist.images
+      }
+      return transformProduct
+  
+    }
