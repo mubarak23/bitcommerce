@@ -1,16 +1,20 @@
-import { Body, Get, Post, Request, Route, Security, Tags } from "tsoa"
+import { Body, Get, Post, Query, Request, Route, Security, Tags } from "tsoa"
+import { getFreshConnection } from "../db"
 import { AddProductCartDto } from "../dto/AddProductCartDto"
 import { BrandResponse } from "../dto/BrandResponse"
 import { CartResponse } from "../dto/CartResponse"
 import { CategoryResponse } from "../dto/CategoryResponse"
+import { IPaginatedList } from "../dto/IPaginatedList"
 import { NewBrandDto } from "../dto/NewBrandDto"
 import { NewCategoryDto } from "../dto/NewCategoryDto"
 import { NewProductDto } from "../dto/NewProductDto"
 import { ProductResponse } from "../dto/ProductResponse"
+import { Product } from "../entity/Product"
 import { User } from "../entity/User"
+import { SortOrder } from "../enums/SortOrder"
 import { IServerResponse } from "../interfaces/IServerResponse"
-import * as ProductService from '../services/productService'
-
+import * as PaginationService from "../services/paginationService"
+import * as ProductService from "../services/productService"
 @Route("/api/product")
 @Tags("Product Service")
 export class ProductController {
@@ -54,6 +58,48 @@ public async handleFetchCartItems(@Request() req: any): Promise<IServerResponse<
       }
       return resData
   }  
+
+  @Get("/")
+  public async handleFetchProducts(
+    @Query("pageNumber") pageNumber: any,
+    @Query("sortOrder") sortOrder: SortOrder,
+  ): Promise<IServerResponse<IPaginatedList<ProductResponse>>> {
+
+    const connection = await getFreshConnection()
+    const productRepo = connection.getRepository(Product)
+
+    const query: any = {
+      isSoftDeleted: false,
+    };
+    const join = {
+      alias: "product",
+      leftJoinAndSelect: {
+        sellerUser: "product.sellerUser",
+        category: "product.category",
+        brand: "product.brand",
+      },
+    };
+
+
+    const pageSize = 20;
+
+    const productListsPages = await PaginationService.paginate(Product,
+      query, pageSize, pageNumber, sortOrder, undefined, join) as IPaginatedList<Product>
+
+    const products: Product[] = productListsPages.dataset;
+
+    const total = await productRepo.count(query);
+
+    const productsResponse: ProductResponse[] =
+      await ProductService.transformProducts(products);
+
+    const resData: IServerResponse<IPaginatedList<ProductResponse>> = {
+      status: true,
+      data: { pageNumber, total, pageSize, dataset: productsResponse },
+    };
+    return resData;
+  }
+
 
 
 @Post("/category")

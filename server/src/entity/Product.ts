@@ -5,6 +5,8 @@ import Tables from "../enums/Tables";
 import { SimpleImageJson } from "../interfaces/SimpleImageJson";
 import { utcNow } from "../utils/core";
 import DefualtEntity from "./BaseEntity";
+import { Brand } from "./Brand";
+import { Category } from "./Category";
 import { User } from "./User";
 
 
@@ -26,8 +28,22 @@ export class Product extends DefualtEntity {
   @Column({ name: ProductColumns.CATEGORY_ID, nullable: false })
   categoryId: number;
 
+  @ManyToOne(() => Category, { primary: true, eager: true })
+  @JoinColumn({
+    name: ProductColumns.CATEGORY_ID,
+    referencedColumnName: TableColumns.ID,
+  })
+  category: Category;
+
   @Column({ name: ProductColumns.BRAND_ID, nullable: false })
   brandId: number;
+
+  @ManyToOne(() => Brand, { primary: true, eager: true })
+  @JoinColumn({
+    name: ProductColumns.BRAND_ID,
+    referencedColumnName: TableColumns.ID,
+  })
+  brand: Brand;
 
   @Column({ name: ProductColumns.NAME, nullable: false })
   name: string;

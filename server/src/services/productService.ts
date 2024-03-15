@@ -1,5 +1,6 @@
 
 import { fiatToSatoshis } from 'bitcoin-conversion';
+import _ from 'underscore';
 import { getFreshConnection } from "../db";
 import { AddProductCartDto } from '../dto/AddProductCartDto';
 import { BrandResponse } from "../dto/BrandResponse";
@@ -15,6 +16,7 @@ import { Category } from "../entity/Category";
 import { Product } from "../entity/Product";
 import { User } from "../entity/User";
 import { CartItemJson } from '../interfaces/CartItemJson';
+import * as ProfileService from '../services/profileService';
 import { UnprocessableEntityError } from "../utils/error-response-types";
 
 export const newBrand = async (payload: NewBrandDto): Promise<BrandResponse> => {
@@ -249,6 +251,7 @@ export const fetchBrands = async (): Promise<BrandResponse[]> => {
       maxQty: newProduct.maxQty,
       price: newProduct.price,
       priceInSats: satsAmount,
+      seller: sellerUser
 
     }
     return responseData
@@ -325,4 +328,98 @@ export const fetchBrands = async (): Promise<BrandResponse[]> => {
    
     }
 
+ 
+    export const transformProducts = async (products: Product[]): Promise<ProductResponse[]> => {
+      if(!products.length) {
+        return []
+      }
+
+      const sellerUserIds = products.filter((product) => product.isActive === true).map((product) => product.userId);
     
+      const sellerPublicProfiles = await ProfileService.getPublicProfileFromUserIds(
+        sellerUserIds
+      );
+    
+
+      const productsResponse: ProductResponse[] = []
+    
+      for(const product of products) {
+
+        const sellerUserUuid = product.sellerUser.uuid;
+        const sellerPublicProfile = sellerPublicProfiles.find(
+          (publicProfile) => publicProfile.uuid === sellerUserUuid
+        );
+    
+        const productImages = product.images || []
+        const productResponseImages: {url: string, mimetype: string, keyFromCloudProvider: string }[] = 
+          productImages.map(pImage => _.omit(pImage, 'fileCloudProvider'))
+
+        const transformProduct: ProductResponse = {
+          productUuid: product.uuid,
+          categoryUuid: product.category.uuid,
+          categoryName: product.category.name,
+          brandUuid: product.brand.uuid,
+          brandName: product.brand.name,
+          name: product.name,
+          description: product.description,
+          minQty: product.minQty,
+          maxQty: product.maxQty,
+          price: product.price,
+          priceInSats: product.priceInSats,
+          images: productResponseImages,
+          seller: sellerPublicProfile
+        }
+        productsResponse.push(transformProduct)
+      }
+    
+      return productsResponse;
+    };
+    
+    
+    export const transformProduct = async (productUuid: string): Promise<ProductResponse> => {
+
+      const connection = await getFreshConnection()
+      const productRepo = connection.getRepository(Product)
+    
+     
+      const join = {
+        alias: "product",
+        leftJoinAndSelect: {
+          sellerUser: "product.sellerUser",
+          category: "product.category",
+          brand: "product.brand",
+        },
+      };
+  
+      const productExist = await productRepo.findOne({
+        where: { uuid: productUuid, isSoftDeleted: false},
+        join
+      })
+    
+      if(!productExist){
+       throw new UnprocessableEntityError("Product Does Not Exist")
+      }
+
+
+      const sellerPublicProfile = await ProfileService.IPublicProfile(
+        productExist.sellerUser
+      ); 
+  
+      const transformProduct: ProductResponse = {
+        productUuid: productExist.uuid,
+        categoryUuid: productExist.category.uuid,
+        categoryName: productExist.category.name,
+        brandUuid: productExist.brand.uuid,
+        brandName: productExist.brand.name,
+        name: productExist.name,
+        description: productExist.description,
+        minQty: productExist.minQty,
+        maxQty: productExist.maxQty,
+        price: productExist.price,
+        priceInSats: productExist.priceInSats,
+        images: productExist.images,
+        seller: sellerPublicProfile
+      }
+      return transformProduct
+  
+    }
