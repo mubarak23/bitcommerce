@@ -43,6 +43,12 @@ export enum ProductColumns {
   IS_SOFT_DELETED = "is_soft_delete",
 }
 
+export enum CartColumns {
+  UUID = "uuid",
+  USER_ID = "user_id",
+  CART_ITEMS = "cart_items",
+  IS_SOFT_DELETED = "is_soft_delete",
+}
 
 export enum OrderColumns {
   UUID = "uuid",

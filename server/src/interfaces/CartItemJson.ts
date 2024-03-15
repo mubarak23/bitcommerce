@@ -6,8 +6,5 @@ export interface CartItemJson {
   productName: string,
   quantity: number,
   unitPrice: number,
-  unitPriceForBuyer: number,
-  unitPromoPriceForBuyer?: number | null,
-  promotionId?: number | null, 
   images?: SimpleImageJson[],
 }
