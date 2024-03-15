@@ -1,5 +1,6 @@
 
 import { fiatToSatoshis } from 'bitcoin-conversion';
+import _ from 'underscore';
 import { getFreshConnection } from "../db";
 import { AddProductCartDto } from '../dto/AddProductCartDto';
 import { BrandResponse } from "../dto/BrandResponse";
@@ -15,6 +16,7 @@ import { Category } from "../entity/Category";
 import { Product } from "../entity/Product";
 import { User } from "../entity/User";
 import { CartItemJson } from '../interfaces/CartItemJson';
+import * as ProfileService from '../services/profileService';
 import { UnprocessableEntityError } from "../utils/error-response-types";
 
 export const newBrand = async (payload: NewBrandDto): Promise<BrandResponse> => {
@@ -249,6 +251,7 @@ export const fetchBrands = async (): Promise<BrandResponse[]> => {
       maxQty: newProduct.maxQty,
       price: newProduct.price,
       priceInSats: satsAmount,
+      seller: sellerUser
 
     }
     return responseData
@@ -330,9 +333,27 @@ export const fetchBrands = async (): Promise<BrandResponse[]> => {
       if(!products.length) {
         return []
       }
+
+      const sellerUserIds = products.filter((product) => product.isActive === true).map((product) => product.userId);
+    
+      const sellerPublicProfiles = await ProfileService.getPublicProfileFromUserIds(
+        sellerUserIds
+      );
+    
+
       const productsResponse: ProductResponse[] = []
     
       for(const product of products) {
+
+        const sellerUserUuid = product.sellerUser.uuid;
+        const sellerPublicProfile = sellerPublicProfiles.find(
+          (publicProfile) => publicProfile.uuid === sellerUserUuid
+        );
+    
+        const productImages = product.images || []
+        const productResponseImages: {url: string, mimetype: string, keyFromCloudProvider: string }[] = 
+          productImages.map(pImage => _.omit(pImage, 'fileCloudProvider'))
+
         const transformProduct: ProductResponse = {
           productUuid: product.uuid,
           categoryUuid: product.category.uuid,
@@ -345,7 +366,8 @@ export const fetchBrands = async (): Promise<BrandResponse[]> => {
           maxQty: product.maxQty,
           price: product.price,
           priceInSats: product.priceInSats,
-          images: product.images
+          images: productResponseImages,
+          seller: sellerPublicProfile
         }
         productsResponse.push(transformProduct)
       }
@@ -358,39 +380,45 @@ export const fetchBrands = async (): Promise<BrandResponse[]> => {
 
       const connection = await getFreshConnection()
       const productRepo = connection.getRepository(Product)
-      const brandRepo = connection.getRepository(Brand)
-      const categoryRepo = connection.getRepository(Category)
+    
      
+      const join = {
+        alias: "product",
+        leftJoinAndSelect: {
+          sellerUser: "product.sellerUser",
+          category: "product.category",
+          brand: "product.brand",
+        },
+      };
+  
       const productExist = await productRepo.findOne({
-        where: { uuid: productUuid, isSoftDeleted: false}
+        where: { uuid: productUuid, isSoftDeleted: false},
+        join
       })
     
       if(!productExist){
        throw new UnprocessableEntityError("Product Does Not Exist")
       }
 
-      // pull the product brand and category  
-      const category = await categoryRepo.findOne({
-        id: productExist.categoryId
-      })
-  
-      const brand = await brandRepo.findOne({
-        where: { id: productExist.brandId }
-      })
+
+      const sellerPublicProfile = await ProfileService.IPublicProfile(
+        productExist.sellerUser
+      ); 
   
       const transformProduct: ProductResponse = {
         productUuid: productExist.uuid,
-        categoryUuid: category!.uuid,
-        categoryName: category!.name,
-        brandUuid: brand!.uuid,
-        brandName: brand!.name,
+        categoryUuid: productExist.category.uuid,
+        categoryName: productExist.category.name,
+        brandUuid: productExist.brand.uuid,
+        brandName: productExist.brand.name,
         name: productExist.name,
         description: productExist.description,
         minQty: productExist.minQty,
         maxQty: productExist.maxQty,
         price: productExist.price,
         priceInSats: productExist.priceInSats,
-        images: productExist.images
+        images: productExist.images,
+        seller: sellerPublicProfile
       }
       return transformProduct
   

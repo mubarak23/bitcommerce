@@ -74,16 +74,17 @@ public async handleFetchCartItems(@Request() req: any): Promise<IServerResponse<
     const join = {
       alias: "product",
       leftJoinAndSelect: {
-        user: "product.user",
+        sellerUser: "product.sellerUser",
         category: "product.category",
         brand: "product.brand",
       },
     };
 
+
     const pageSize = 20;
 
     const productListsPages = await PaginationService.paginate(Product,
-      query, pageSize, pageNumber, sortOrder, undefined) as IPaginatedList<Product>
+      query, pageSize, pageNumber, sortOrder, undefined, join) as IPaginatedList<Product>
 
     const products: Product[] = productListsPages.dataset;
 
