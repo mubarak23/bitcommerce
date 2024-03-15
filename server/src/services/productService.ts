@@ -3,6 +3,7 @@ import { fiatToSatoshis } from 'bitcoin-conversion';
 import { getFreshConnection } from "../db";
 import { AddProductCartDto } from '../dto/AddProductCartDto';
 import { BrandResponse } from "../dto/BrandResponse";
+import { CartResponse } from '../dto/CartResponse';
 import { CategoryResponse } from "../dto/CategoryResponse";
 import { NewBrandDto } from "../dto/NewBrandDto";
 import { NewCategoryDto } from "../dto/NewCategoryDto";
@@ -175,6 +176,33 @@ export const fetchBrands = async (): Promise<BrandResponse[]> => {
     return transformCategories
   }
 
+
+  export const fetchCartItems = async (buyerId: number): Promise<CartResponse> => {
+    const connection = await getFreshConnection()
+    const cartRepo = connection.getRepository(Cart)
+  
+    const buyerCart = await cartRepo.findOne({
+      where: { userId: buyerId, isSoftDeleted: false}
+    })
+  
+    if(buyerCart){
+      throw new UnprocessableEntityError('No Cart Available')
+    }
+
+    if(buyerCart.cartItems.length === 0){
+      throw new UnprocessableEntityError('No items in cart at the moment')
+    }
+  
+    let transformCart: CartResponse = {
+      uuid: buyerCart.uuid,
+      cartItems: buyerCart.cartItems,
+      userId: buyerCart.userId
+    }
+  
+    return transformCart
+  
+  }
+  
 
   export const saveNewProduct = async (sellerUser: User, payload: NewProductDto): Promise<ProductResponse> => {
     const connection = await getFreshConnection()

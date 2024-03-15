@@ -1,5 +1,7 @@
 import { Body, Get, Post, Request, Route, Security, Tags } from "tsoa"
+import { AddProductCartDto } from "../dto/AddProductCartDto"
 import { BrandResponse } from "../dto/BrandResponse"
+import { CartResponse } from "../dto/CartResponse"
 import { CategoryResponse } from "../dto/CategoryResponse"
 import { NewBrandDto } from "../dto/NewBrandDto"
 import { NewCategoryDto } from "../dto/NewCategoryDto"
@@ -37,6 +39,22 @@ public async handleFetchBrands(@Request() req: any): Promise<IServerResponse<Bra
       }
       return resData
   }  
+
+@Security("jwt")
+@Get('/fetch-cart-items')
+public async handleFetchCartItems(@Request() req: any): Promise<IServerResponse<CartResponse>> {
+
+      const currentUser = req.user;
+
+      const fetchCartItems = await ProductService.fetchCartItems(currentUser.id)
+  
+      const resData: IServerResponse<CartResponse> = {
+        status: true,
+        data: fetchCartItems
+      }
+      return resData
+  }  
+
 
 @Post("/category")
 public async handlNewCategory(@Body() reqBody: NewCategoryDto) : Promise<IServerResponse<CategoryResponse>>{
@@ -80,6 +98,23 @@ public async handleNewProduct(@Request() req: any, @Body() reqBody: NewProductDt
 
     return resData
   }
+
+@Security("jwt")
+@Post('/add-to-cart')
+public async handleAddProductToCart(@Request() req: any, @Body() reqBody: AddProductCartDto): Promise<IServerResponse<boolean>> {
+    
+    const currentUser: User = req.user
+
+    const addProductToCart = await ProductService.addProductToCart(currentUser, reqBody)
+    
+    const resData: IServerResponse<boolean> = {
+      status: true,
+      data: addProductToCart
+    }
+
+    return resData
+  }
+
 
 
 }
