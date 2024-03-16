@@ -1,6 +1,7 @@
 
 import { fiatToSatoshis } from 'bitcoin-conversion';
 import _ from 'underscore';
+import * as Utils from '.././utils/core';
 import { getFreshConnection } from "../db";
 import { AddProductCartDto } from '../dto/AddProductCartDto';
 import { BrandResponse } from "../dto/BrandResponse";
@@ -9,13 +10,17 @@ import { CategoryResponse } from "../dto/CategoryResponse";
 import { NewBrandDto } from "../dto/NewBrandDto";
 import { NewCategoryDto } from "../dto/NewCategoryDto";
 import { NewProductDto } from "../dto/NewProductDto";
+import { orderResponse } from '../dto/OrderResponse';
 import { ProductResponse } from "../dto/ProductResponse";
 import { Brand } from "../entity/Brand";
 import { Cart } from '../entity/Cart';
 import { Category } from "../entity/Category";
+import { Order } from '../entity/Order';
 import { Product } from "../entity/Product";
 import { User } from "../entity/User";
+import { OrderStatuses, PaymentStatus } from '../enums/Statuses';
 import { CartItemJson } from '../interfaces/CartItemJson';
+import * as lightningService from '../services/lightningService';
 import * as ProfileService from '../services/profileService';
 import { UnprocessableEntityError } from "../utils/error-response-types";
 
@@ -422,4 +427,62 @@ export const fetchBrands = async (): Promise<BrandResponse[]> => {
       }
       return transformProduct
   
+    }
+
+    export const createOrderFromCart = async (buyerUser: User): Promise<orderResponse> => {
+      const connection = await getFreshConnection()
+      const cartRepo = connection.getRepository(Cart)
+      const orderRepo = connection.getRepository(Order)
+  
+      const buyerCartExist = await cartRepo.findOne({
+        where: { userId: buyerUser.id, isSoftDeleted: false }
+      })
+
+      if(!buyerCartExist){
+        throw new UnprocessableEntityError("Buyer Cart Does Not Exist")
+      }
+
+      if(buyerCartExist.cartItems.length === 0){
+        throw new UnprocessableEntityError("No Item in the cart")
+      }
+
+      let totalOrderPrice = 0
+
+      totalOrderPrice = buyerCartExist.cartItems.reduce((accumulator, item) => {
+        return accumulator + item.unitPrice;
+      }, 0);
+
+      const satsAmount = await fiatToSatoshis(totalOrderPrice, 'NGN');
+
+      const reference = Utils.generateUniqueReference(12)
+      
+      let newOrder = new Order().initializeNewOrderFromCartByBuyer(buyerUser.id, buyerCartExist.cartItems, reference, PaymentStatus.UNPAID, OrderStatuses.CREATED, totalOrderPrice)
+      newOrder = await orderRepo.save(newOrder)
+
+      const referenceNumber = Utils.getOrderEntityReferenceNumber(newOrder)
+
+      // generate the invoice 
+      const lnInvoice = await lightningService.generateNewInvoice(satsAmount)
+
+      await orderRepo.createQueryBuilder()
+      .update(Order)
+      .set({
+        referenceNumber,
+        calculatedTotalCostMajorSats: satsAmount,
+        paymentRequest: lnInvoice.paymentRequest
+      })
+      .where({
+        id: newOrder.id
+      })
+      .execute()
+
+      // once invoice is paid, 
+      // create seller sales base on the items in the orderItems
+      
+      const response : orderResponse = {
+        orderUuid: newOrder.uuid,
+        invoice: lnInvoice
+      }
+      return response
+
     }
