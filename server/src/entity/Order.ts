@@ -5,6 +5,7 @@ import TableColumns, { OrderColumns } from "../enums/TableColumns";
 import Tables from "../enums/Tables";
 import { CartItemJson } from "../interfaces/CartItemJson";
 import { utcNow } from "../utils/core";
+import { ColumnNumericTransformer } from "../utils/transformers";
 import DefualtEntity from "./BaseEntity";
 import { User } from "./User";
 
@@ -24,15 +25,15 @@ export class Order extends DefualtEntity {
   })
   buyerUser: User;
 
-  @Column({ name: OrderColumns.SELLER_USER_ID, nullable: false })
-  sellerUserId: number;
+  // @Column({ name: OrderColumns.SELLER_USER_ID, nullable: false })
+  // sellerUserId: number;
 
-  @ManyToOne(() => User, { primary: true })
-  @JoinColumn({
-    name: OrderColumns.SELLER_USER_ID,
-    referencedColumnName: TableColumns.ID,
-  })
-  sellerUser: User;
+  // @ManyToOne(() => User, { primary: true })
+  // @JoinColumn({
+  //   name: OrderColumns.SELLER_USER_ID,
+  //   referencedColumnName: TableColumns.ID,
+  // })
+  // sellerUser: User;
 
   @Column({ type:'json', name: OrderColumns.ORDER_ITEMS, nullable: false})
   orderItems: CartItemJson[];
@@ -40,8 +41,26 @@ export class Order extends DefualtEntity {
   @Column({ name: OrderColumns.REFERENCE, nullable: false })
   reference: string;
 
-  @Column({ name: OrderColumns.REFERENCE_NUMBER, nullable: false })
-  referenceNumber: number;
+  @Column({ name: OrderColumns.REFERENCE_NUMBER, nullable: true })
+  referenceNumber: string;
+
+  @Column({
+    type: "decimal",
+    name: OrderColumns.CALCULATED_TOTAL_COST_MAJOR,
+    default: 0,
+    transformer: new ColumnNumericTransformer(),
+  })
+  calculatedTotalCostMajor: number;
+
+  @Column({
+    type: "decimal",
+    name: OrderColumns.CALCULATED_TOTAL_COST_MAJOR_SATS,
+    default: 0,
+    nullable: true,
+    transformer: new ColumnNumericTransformer(),
+  })
+  calculatedTotalCostMajorSats: number;
+
 
   @Column({ name: OrderColumns.PAYMENT_REQUEST, nullable: true })
   paymentRequest: string;
@@ -62,15 +81,13 @@ export class Order extends DefualtEntity {
   })
   isSoftDeleted: boolean;
 
-  initializeNewOrderFromCartByBuyer(buyerUserId: number, sellerUserId: number, orderItems: CartItemJson[], reference: string,
-    referenceNumber: number, paymentStatus: PaymentStatus, status: OrderStatuses ){
+  initializeNewOrderFromCartByBuyer(buyerUserId: number, orderItems: CartItemJson[], reference: string,
+   paymentStatus: PaymentStatus, status: OrderStatuses, calculatedTotalCostMajor: number ){
     const now = utcNow();
     this.uuid = uuidv4();
     this.buyerUserId = buyerUserId;
-    this.sellerUserId = sellerUserId;
     this.orderItems = orderItems;
     this.reference = reference;
-    this.referenceNumber = referenceNumber;
     this.paymentStatus = paymentStatus;
     this.status = status;
     this.createdAt = now;
